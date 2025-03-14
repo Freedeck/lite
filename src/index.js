@@ -8,6 +8,7 @@ const socketDotio = require("socket.io");
 const fs = require("fs");
 const socketio = socketDotio(server);
 const eventNames = require("./eventNames"); // Freedeck 6.0.0d-rc3
+const profiling = require("./profiling");
 
 /**
  * These are your settings to change. How do you want Freedeck Lite to appear?
@@ -47,7 +48,7 @@ app.get("/connect/webpack", (req,res) => {
 })
 
 app.get("/connect/event-bus", (req,res) => {
-  res.send(frequencyMap)
+  res.send(profiling._finished);
 })
 
 app.get("/connect/dev-status", (req,res) => {
@@ -91,29 +92,11 @@ const serverInfo = {
 };
 let serverInfoBuffer;
 
-const frequencyMap = [];
-const os = require("os");
 socketio.on("connection", (socket) => {
   console.log("SOCKET CONNECTED")
   socket.onAny((e, ...args) => {
     console.log(`Received event ${e} with args ${args}`)
-    const event = {
-      event: e, 
-      recv: Date.now(),
-      preParse: {
-        loadavg: os.loadavg(),
-        freemem: os.freemem(),
-        totalmem: os.totalmem()
-      },
-      postParse: {
-        loadAvg: [-1,-1,-1],
-        freemem: -1,
-        totalmem: -1,
-      },
-      finishParse: -1,
-      deltaParse: 0,
-      args
-    };
+    const id = profiling.received(e, args);
     switch(e) {
       case eventNames.client_greet: {
         // First thing a client will ever send us according to spec
@@ -139,14 +122,7 @@ socketio.on("connection", (socket) => {
         break;
       }
     }
-    event.finishParse = Date.now();
-    event.deltaParse = Math.abs(event.recv - event.finishParse);
-    event.postParse = {
-      loadavg: os.loadavg(),
-      freemem: os.freemem(),
-      totalmem: os.totalmem()
-    };
-    frequencyMap.push(event)
+    profiling.finish(id);
   })
 })
 
