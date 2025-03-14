@@ -1,0 +1,158 @@
+<h1 class="settings-section-title">
+	Device Pairing <span><img src="/common/icons/pairing.svg" width="50" height="50"></span>
+</h1>
+<center class="dev-status">Status: Your device is not connected yet!</center>
+<br>
+<center>What device are you using?</center>
+<br>
+<div class="flc">
+	<button class="long" id="connect-button">
+		<img src="/common/icons/apple.svg" width="25" height="25">
+		<p>iOS (iPhone, iPad, etc..)</p>
+	</button>
+	<button class="long" id="connect-button-android">
+		<img src="/common/icons/android.svg" width="25" height="25">
+		Android (Samsung, Pixel, etc..)
+	</button>
+	<button id="later-button">Connect Later</button>
+</div>
+
+<div id="conn-content" style="display: none;">
+	<h1>Connect to Freedeck on <span class="osp-selected">iOS</span></h1>
+	<ul>
+		<li>Open <strong class="osp-browser">Safari</strong> and go to http://<span class="local-net"></span>:5754</li>
+		<li>When you see your Freedeck, <span class="osp-add-to-home-screen">press Share at the bottom</span>.</li>
+		<li>Press <i>Add To Home Screen</i></li>
+	</ul>
+	<p>This will automatically close when your device is connected.</p>
+	<div class="flex-wrap-r">
+		<button id="back">Back</button>
+		<button onclick="document.querySelector('#later-button').click()">Connect Later</button>
+	</div>
+</div>
+
+<script>
+	const selection = document.querySelector(".flc");
+	const laterButton = document.querySelector('#later-button');
+	const localNet = document.querySelectorAll('.local-net');
+	const back = document.querySelector('#back');
+
+	back.onclick = () => {
+		document.querySelector('#conn-content').style.display = 'none';
+		selection.style.display = 'flex';
+	}
+
+	const placeholderOs = document.querySelector('.osp-selected');
+	const placeholderBrowser = document.querySelector('.osp-browser');
+	const placeholderAddToHomeScreen = document.querySelector('.osp-add-to-home-screen');
+
+	const connectButton = document.querySelector('#connect-button');
+	const connectButtonAndroid = document.querySelector('#connect-button-android');
+	const connContent = document.querySelector('#conn-content');
+	connectButtonAndroid.onclick = () => {
+		placeholderOs.innerText = 'Android';
+		placeholderBrowser.innerText = 'your web browser (Example: Chrome)';
+		placeholderAddToHomeScreen.innerText = 'click the three dots in the top right';
+		document.querySelector('#conn-content').style.display = 'block';
+		selection.style.display = 'none';
+	}
+	connectButton.onclick = () => {
+		placeholderOs.innerText = 'iOS';
+		placeholderBrowser.innerText = 'Safari';
+		placeholderAddToHomeScreen.innerText = 'press the share button at the bottom (or top right)';
+		document.querySelector('#conn-content').style.display = 'block';
+		selection.style.display = 'none';
+	}
+	universal.uiSounds.playSound('step_1')
+
+	laterButton.onclick = () => {
+		universal.uiSounds.playSound('step_1')
+		universal.sendEvent("finish_conn");
+		document.querySelector("#sidebar").style.right = "-20%";
+		universal.save("has_setup", true);
+		universal.reloadRight();
+		universal.vclose();
+		universal.vopen("index");
+		document.querySelector("#sidebar").style.right = "0";
+	}
+	let code = 'A code could not be generated.';
+	let ip;
+
+	fetch('/connect/local-ip').then(res => res.json()).then(data => {
+		localNet.forEach(e => e.innerText = data.ip[Object.keys(data.ip)[0]][0]);
+		if (Object.keys(data.ip).length == 0) {
+			document.querySelectorAll('.mfa-code').forEach(e => e.innerText = "You are offline, please try again later.");
+			return;
+		}
+		ip = data.ip[Object.keys(data.ip)[0]][0];
+		code = "Lite"
+	});
+
+	function submitAndRequestCode() {
+		document.querySelectorAll('.mfa-code').forEach(e => {
+			e.innerText = "using freedeck lite disables my.freedeck.app support, connect your device manually."
+		});
+	}
+
+	const poll = setInterval(() => {
+		fetch('/connect/dev-status').then(res => res.json()).then(data => {
+			const status = data.message;
+			const devStatus = document.querySelectorAll('.dev-status');
+			devStatus.forEach(e => e.innerText = `Status: ${status}`);
+			if (data.state) {
+				devStatus.forEach(e => e.style.color = 'green');
+				document.querySelector('#later-button').innerText = 'Close';
+				clearInterval(poll);
+				universal.uiSounds.playSound('step_3');
+				document.querySelector('#later-button').click();
+			} else {
+				devStatus.forEach(e => e.style.color = 'red');
+			}
+		});
+	}, 500);
+</script>
+
+<style>
+	.mfa-code {
+		font-weight: bold;
+		font-size: 1.5rem;
+	}
+
+	.flc {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+	}
+
+	.flc button {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	.flc button.long {
+		width: 75%;
+	}
+
+	.form {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.form button {
+		margin-top: 1rem;
+	}
+
+	button:active {
+		transform: scale(0.95);
+		filter: brightness(0.9);
+	}
+
+	button:hover {
+		transform: scale(1.05);
+		filter: brightness(1.1);
+	}
+</style>

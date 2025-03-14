@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta content="Freedeck" property="og:title" />
+    <meta content="#00b3ff" data-react-helmet="true" name="theme-color" />
+    <meta name="theme-color" content="#00b3ff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Freedeck" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="msapplication-TileColor" content="#00b3ff" />
+    <meta name="msapplication-config" content="/assets/icons/browserconfig.xml" />
+
+    <link rel="apple-touch-icon" sizes="180x180" href="/common/icons/fd.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/common/icons/fd.png" />
+
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="client-only.css" />
+    <title>Freedeck</title>
+</head>
+
+<body>
+    <div class="everything">
+        <div id="sidebar">
+            <ul></ul>
+        </div>
+    
+        <div class="settings-menu">
+            <div class="flex-wrap-r alc">
+                <h1 id="version">Freedeck</h1>
+                <img src="/common/icons/fd.png" width="50" height="50" />
+            </div>
+            
+            <div class="flex-wrap-r">
+                <input type="checkbox" name="lock" id="lock">
+                <label for="lock">Page Lock</label>
+            </div>
+            
+            <details>
+                <summary>Themes</summary>
+                <div class="themelist"></div>
+            </details>
+            
+            <details>
+                <summary>Advanced Options</summary>
+                <div class="flex-wrap-r">
+                    <button onclick="window.location.href = '/companion'">
+                        To Companion View
+                    </button>
+                    <button onclick="universal.send(universal.events.default.recompile)">
+                        Recompile Webpack bundles
+                    </button>
+                </div>
+            </details>
+
+            <div class="flex-wrap-r">
+                <button onclick="window.location.reload()">
+                    Reload
+                </button>
+                <button onclick="universal.send(universal.events.keypress, {builtIn: true,data: 'stop-all'});">
+                    Stop All
+                </button>
+                <button onclick="window.AppSMClose()">
+                    Close
+                </button>
+            </div>
+
+        </div>
+        <div style="display: none; z-index: 10200" class="modal" id="login-dialog">
+            <div id="login-div" class="modalContent">
+                <h1 id="login-msg">Welcome to your Freedeck.</h1>
+                <p>Enter the password to connect to the server</p>
+                <input type="password" id="password" />
+                <br/>
+                <div class="flex-wrap-r">
+                    <button onclick="universal.login(document.getElementById('password').value)">
+                        Login
+                    </button>
+                    <button onclick="window.location.reload();">Reload</button>
+                </div>
+            </div>
+        </div>
+        <div id="client-key-container">
+            <div id="keys"></div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/common/error.js" type="module"></script>
+    <script src="/app/clientMain.js" type="module"></script>
+    <script src="/app/settingsThemes.js" type="module"></script>
+    <script>
+        window.addEventListener("message", (event) => {
+            if (event.data === "close") {
+                console.log(true);
+                document.querySelector(".prompt").style.display = "none";
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,38 @@
+<center><h1>Freedeck Lite Debug Menu</h1></center>
+
+<p>Welcome, admin</p>
+
+<button id="universal-keyall">Run All Keys</button>
+<details>
+  <summary><small>Universal[keys]</small></summary>
+  <ul id="universal-keys">
+
+  </ul>
+</details>
+
+<style>
+  * {
+    border-radius: 0;
+  }
+</style>
+
+<script>
+  const keys = Object.keys(universal);
+  for(const key of keys) {
+    const ele =document.createElement("li");
+    ele.innerHTML=`${universal.cleanHTML(key)} <button class="universal-key" data-key="${universal.cleanHTML(key)}">Run Single</button>`;
+    document.querySelector("#universal-keys").appendChild(ele);
+    ele.onclick = () => {
+      if(key == "reconnect") {
+        console.log("recon")
+      }
+      console.log(key)
+      universal[key]();
+    }
+  }
+  document.querySelector("#universal-keyall").onclick = () => {
+    for(const button of document.querySelectorAll(".universal-key")) {
+      button.click();
+    }
+  }
+</script>

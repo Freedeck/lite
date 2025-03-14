@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="companion.css" />
+    <title>Freedeck</title>
+</head>
+
+<body style="overflow: hidden">
+    <div style="display: none; z-index: 10200" class="modal" id="login-dialog">
+        <div id="login-div" class="modalContent">
+            <h1 id="login-msg">Welcome to your Freedeck.</h1>
+            <p>Enter the password to connect to the server</p>
+            <input type="password" id="password" />
+            <br/>
+            <div class="flex-wrap-r">
+                <button onclick="universal.login(document.getElementById('password').value)">
+                    Login
+                </button>
+                <button onclick="window.location.reload();">Reload</button>
+            </div>
+        </div>
+    </div>
+    <dialog id="editor">
+        <div id="editor-div">
+            <div class="x" id="editor-close">Close</div>
+            <div class="editor-section editor-info">
+                <div data-state="not" class="button" id="editor-btn">Not Loaded</div>
+                <div class="flex-wrap-r alc">
+                    <label for="name">Title</label>
+                    <input type="text" id="name" value="Not Loaded" />
+                </div>
+                <div class="button" style="height:30px;min-height:30px;" id="upload-icon">
+                    Set Icon
+                </div>
+                <details>
+                    <summary>
+                        <strong>Appearance</strong>
+                    </summary>
+                    <div class="flex-wrap-r alc">
+                        <label for="color">Background</label>
+                        <input type="color" id="color" data-has_set="false" value="#000" />
+                    </div>
+                    <div class="flex-wrap-r alc">
+                        <label for="sbg">No Background</label>
+                        <input class="fdc-checkbox" type="checkbox" id="sbg" />
+                    </div>
+                    <div class="flex-wrap-r alc">
+                        <label for="nbo">No Border</label>
+                        <input class="fdc-checkbox" type="checkbox" id="nbo" />
+                    </div>
+                    <div class="flex-wrap-r alc">
+                        <label for="nbr">No Rounding</label>
+                        <input class="fdc-checkbox" type="checkbox" id="nbr" />
+                    </div>
+                    <div class="flex-wrap-r alc">
+                        <label for="nsh">No Shadow</label>
+                        <input class="fdc-checkbox" type="checkbox" id="nsh" />
+                    </div>
+                </details>
+                <details>
+                    <summary>
+                        <strong>Controls</strong>
+                    </summary>
+                    <div class="flex-wrap-r alc">
+                        <label for="lp">Long Press</label>
+                        <input class="fdc-checkbox" type="checkbox" id="lp" />
+                    </div>
+                    <div class="flex-wrap-r alc">
+                        <label for="orl">On release?</label>
+                        <input class="fdc-checkbox" type="checkbox" id="orl" />
+                    </div>
+                </details>
+                <details>
+                    <summary><strong>Advanced</strong></summary>
+                    <div class="flex-wrap-r alc">
+                        <label for="type">Type</label>
+                        <input style="color:white;" type="text" id="type" value="fd.sound" disabled />
+                    </div>
+                    <div class="flex-wrap-r alc">
+                        <label for="plugin">Plugin</label>
+                        <input style="color:white;" type="text" id="plugin" value="Freedeck" disabled />
+                    </div>
+                    <div class="flex-wrap-r alc">
+                        <label for="rendertype">RenderType</label>
+                        <input style="color:white;" type="text" id="rendertype" value="button" disabled />
+                    </div>
+                    <div class="horizontal-seperator"></div>
+                    <div class="flex-wrap-r" id="editor-data"></div>
+                </details>
+                <br />
+            </div>
+            <div style="display: none" id="plugins-only" class="editor-section plugin-items editor-section-bottom">
+                <div id="spi-actions" class="plugin-items">
+                    <div class="information">
+                        <h3>Plugin</h3>
+                        <p>Select a plugin to control this Tile</p>
+                    </div>
+                    <div class="spi-actions-disabled">
+                        <h1><span class="spi-actions-disabled-id"></span> is uninstalled, disabled, or failed to load!</h1>
+                        <p>
+                            Please restart Freedeck or try reinstalling <span class="spi-actions-disabled-id"></span>.
+                        </p>
+                        <p>You may change this Tile by pressing Back below this message.</p>
+                    </div>
+                    <div class="spi-actions-notfound">
+                        <h2>Failed to find a suitable type for <span class="spi-actions-notfound-type"></span></h2>
+                        <p>
+                            You may need to reload <span class="spi-actions-disabled-id"></span>.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex-wrap-r">
+                    <button class="spiback" id="spiback" style="display: none">
+                        Back
+                    </button>
+                    <button id="spiav" style="display: none">
+                        View Settings
+                    </button>
+                </div>
+            </div>
+            <div style="display: none" id="audio-only" class="editor-section plugin-items editor-section-bottom">
+                <div class="information">
+                    <h3>Soundboard</h3>
+                    <p>Control your Freedeck soundboard!</p>
+                </div>
+                <div class="flex-wrap-r alc">
+                    <p>This tile will play&nbsp;</p>
+                    <h2 id="audio-file" class="information">AUDIOFILE.MP3</h2>
+                </div>
+                <div class="button" id="upload-sound">Change</div>
+            </div>
+            <div style="display: none" id="system-only" class="editor-section editor-section-bottom">
+                <h1>App Volume</h1>
+                <div id="sys-actions" class="plugin-items">
+                    <p>This tile will change the volume of:</p>
+                    <select name="system-select" id="system-select"></select>
+                </div>
+            </div>
+            <div style="display: none" id="macro-only" class="plugin-items editor-section editor-section-bottom">
+                <div class="information">
+                    <h3>Macro<span class="tag-beta">BETA</span></h3>
+                    <p>Type or press a key combination!</p>
+                </div>
+                <div id="sys-actions" class="plugin-items">
+                    <p>When pressed, this tile will perform a</p>
+                    <select name="macro-type" id="macro-type">
+                        <option value="text">Text (only text)</option>
+                        <option value="macro">Keypress (allows CTRL, ALT, etc...)</option>
+                    </select>
+                    <p>macro, which will type</p>
+                    <input type="text" name="macro-macro" id="macro-macro">
+                </div>
+            </div>
+            <div style="display: none" id="profile-only" class="editor-section plugin-items editor-section-bottom">
+                <h1>Folder Switcher</h1>
+                <div class="plugin-items">
+                    <p>Select the folder this tile will switch to</p>
+                </div>
+                <select name="eprofile-select" id="eprofile-select"></select>
+            </div>
+            <div style="display: none" id="none-only" class="plugin-items editor-section editor-section-bottom" >
+                <div class="information">
+                    <h3 data-i18n-key="editor.sections.no_action">No Action!</h3>
+                    <p>What should this tile do?</p>
+                </div>
+                <div class="flex-wrap-r plugin-view-listing tile-selection">
+                    <button id="none-audio">
+                        <p>Soundboard</p>
+                        <img src="/common/icons/t_audio.svg" alt="Audio Tile">
+                    </button>
+                    <button id="none-plugin">
+                        <p>Plugin</p>
+                        <img src="/common/icons/t_plugin.svg" alt="Plugin Tile">
+                    </button>
+                    <button id="none-macro">
+                        <p>Macro</p>
+                        <img src="/common/icons/t_macro.svg" alt="Macro Tile">
+                    </button>
+                    <button id="none-system">
+                        <p>App Volume</p>
+                        <img src="/common/icons/t_app_volume.svg" alt="Application Volume Tile">
+                    </button>
+                    <button id="none-profiles">
+                        <p>Folder Changer</p>
+                        <img src="/common/icons/t_folder.svg" alt="Folder Changer Tile">
+                    </button>
+                </div>
+            </div>
+            <div id="advanced-view" style="display: none;">
+                <div class="flex-wrap">
+                    <div class="esection">
+                        <div class="information">
+                            <h2 id="pl-title">Plugin Settings</h2>
+                            <div id="pl-settings"></div>
+                            <br />
+                            <div class="button" id="change-pl-settings">
+                                Save Changes
+                            </div>
+                        </div>
+                        <div id="spi-actions" class="plugin-items"></div>
+                    </div>
+                    <div class="esection" id="tiledata">
+                        <h2>Tile Data</h2>
+                        <p>These are advanced settings!</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex-wrap-r editor-options">
+                <div class="button" id="editor-back" style="display:none;">Back</div>
+                <div class="button" id="editor-save">Save</div>
+            </div>
+        </div>
+    </dialog>
+    <div class="toggle-sidebar" style="display: none">
+        <button>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+        </button>
+    </div>
+    <div class="sidebar" style="display: flex"></div>
+    <div class="center">
+        <div id="keys"></div>
+    </div>
+    <div class="mt-next-page sal">
+        <p>Move the tile here to drop it onto the next page</p>
+    </div>
+    <div class="mt-prev-page sal">
+        <p>Move the tile here to drop it onto the previous page</p>
+    </div>
+    <script src="/common/error.js" type="module"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/app/main.js" type="module"></script>
+</body>
+
+</html>
